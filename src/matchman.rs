@@ -1,18 +1,29 @@
 pub mod data {
+    use std::collections::HashSet;
+
     use dashmap::DashMap;
 
     pub struct Data {
         fights: DashMap<u64, Vec<super::fight::Fight>>,
-        queues: DashMap<u64, Vec<super::user::MMUser>>
+        pools: DashMap<u64, HashSet<super::user::MMUser>>
     }
 }
 
 pub mod user {
+
+    #[derive(Hash, Eq)]
     pub struct MMUser {
         pub id: u64,
         pub status: Status
     }
 
+    impl PartialEq for MMUser {
+        fn eq(&self, other: &Self) -> bool {
+            self.id == other.id
+        }
+    }
+
+    #[derive(Hash, PartialEq, Eq)]
     pub enum Status {
         Fighting, Queued
     }
