@@ -1,49 +1,38 @@
 pub mod data {
-    use std::collections::HashSet;
+    use std::collections::HashMap;
 
-    use dashmap::DashMap;
-
-    pub struct Data {
-        fights: DashMap<u64, Vec<super::fight::Fight>>,
-        pools: DashMap<u64, HashSet<super::user::MMUser>>
+    pub struct Data<'a> {
+        pub fights: Vec<super::fight::Fight<'a>>,
+        pub pools: HashMap<super::user::MMUser<'a>, String>
     }
 }
 
 pub mod user {
+    use serenity::model::user::User;
 
-    #[derive(Hash, Eq)]
-    pub struct MMUser {
-        pub id: u64,
+
+    #[derive(Hash, Eq, Clone)]
+    pub struct MMUser<'a> {
+        pub user: &'a User,
         pub status: Status
     }
 
-    impl PartialEq for MMUser {
+    impl<'a> PartialEq for MMUser<'a> {
         fn eq(&self, other: &Self) -> bool {
-            self.id == other.id
+            self.user.id.0 == other.user.id.0
         }
     }
 
-    #[derive(Hash, PartialEq, Eq)]
+    #[derive(Hash, PartialEq, Eq, Clone, Copy)]
     pub enum Status {
         Fighting, Queued
     }
 }
 
-pub mod game {
-    pub trait MMGame {
-        // command parser, message sender for each game etc
-        fn gmae_type() -> MMGameType;
-    }
-    
-    pub enum MMGameType {
-        GuiltyGearStrive, SkullGirls
-    }
-}
-
 pub mod fight {
     use super::user::MMUser;
-    pub struct Fight {
-        pub p1: MMUser,
-        pub p2: MMUser
+    pub struct Fight<'a> {
+        pub p1: MMUser<'a>,
+        pub p2: MMUser<'a>
     }
 }
