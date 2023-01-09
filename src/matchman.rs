@@ -1,25 +1,24 @@
 pub mod data {
     use std::collections::HashMap;
 
-    pub struct Data<'a> {
-        pub fights: Vec<super::fight::Fight<'a>>,
-        pub pools: HashMap<super::user::MMUser<'a>, String>
+    pub struct Data {
+        pub fights: Vec<super::fight::Fight>,
+        pub pools: HashMap<super::user::MMUser, String>
     }
 }
 
 pub mod user {
-    use serenity::model::user::User;
-
+    use serenity::model::prelude::UserId;
 
     #[derive(Hash, Eq, Clone)]
-    pub struct MMUser<'a> {
-        pub user: &'a User,
+    pub struct MMUser {
+        pub id: UserId,
         pub status: Status
     }
 
-    impl<'a> PartialEq for MMUser<'a> {
+    impl PartialEq for MMUser {
         fn eq(&self, other: &Self) -> bool {
-            self.user.id.0 == other.user.id.0
+            self.id.0 == other.id.0
         }
     }
 
@@ -31,8 +30,8 @@ pub mod user {
 
 pub mod fight {
     use super::user::MMUser;
-    pub struct Fight<'a> {
-        pub p1: MMUser<'a>,
-        pub p2: MMUser<'a>
+    pub struct Fight {
+        pub p1: MMUser,
+        pub p2: MMUser
     }
 }

@@ -84,7 +84,23 @@ async fn fight(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         if pool.is_empty() {
             check_msg(msg.reply_ping(&ctx.http, "Currently no players in pool, join pool with 'queue'").await);
         } else {
-            todo!()
+            let mentioned = msg.mentions.first();
+            if let Some(next) = msg.mentions.first() {
+                if pool.keys().any(|v| v.id.0 == next.id.0) {
+                    
+                }
+            }
+            if args.len() == 1 || mentioned.is_none() {
+
+            } else {
+                let mentioned = mentioned.unwrap();
+                if pool.keys().any(|v| v.id.0 == mentioned.id.0) {
+                    
+                } else {
+                    // user not in pool
+                    // TODO change design since cannot remove pings from user messages
+                }
+            }
         }
     }
 
@@ -98,7 +114,7 @@ async fn queue(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         let already_contains = {
             let data_read = ctx.data.read().await;
             let data_ref = data_read.get::<MMData>().expect("Expected MMData in TypeMap").clone();
-            let user = MMUser { user: &msg.author, status: Status::Queued };
+            let user = MMUser { id: msg.author.id, status: Status::Queued };
             data_ref.get_mut(&guild_id).map(|mut v| {
                 v.pools.insert(user, args.rest().to_string()).map(|v| true).unwrap_or(false)
             }).unwrap_or(false)
@@ -133,8 +149,16 @@ async fn list(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
             false => {
                 msg.channel_id.send_message(&ctx.http, |m| {
                     m.embed(|e| {
-                        for (user, string) in pool {
-                            e.field(user.user.name, string, true);
+                        for (mmuser, string) in pool {
+                            /*
+                            Since any user in this pool in data must have executed a command to get there,
+                            we can be sure that they are in the cache since the cache is full of users and
+                            other items that are products or components of events happening (the event in
+                            this case was them sending the command)
+                             */
+                            if let Some(user) = ctx.cache.user(mmuser.id) {
+                                e.field(user.name, string, true);
+                            }
                         }
                         e.title("Players")
                     })
